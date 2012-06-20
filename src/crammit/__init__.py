@@ -174,16 +174,24 @@ class AssetManager(object):
         fname_template = '%s%s%s{suffix}%s{gz}' % (name, opt_dash, sha1, file_ext)
 
         concat_fname = fname_template.format(suffix='', gz='')
-        concat_data = self._concat(raw_data, type)
-        self.write(concat_fname, concat_data)
-
         minified_fname = fname_template.format(suffix='.min', gz='')
-        minified_data = self._minify(raw_data, type, paths=paths)
-        self.write(minified_fname, minified_data)
-
         gzipped_fname = fname_template.format(suffix='.min', gz='.gz')
-        gzipped_data = self._compress(minified_data)
-        self.write(gzipped_fname, gzipped_data)
+
+        if self.path_exists(concat_fname):
+            print 'path exists, skipping %s' % concat_fname
+
+            concat_data = open(self._out_path(concat_fname)).read()
+            minified_data = open(self._out_path(minified_fname)).read()
+            gzipped_data = open(self._out_path(gzipped_fname)).read()
+        else:
+            concat_data = self._concat(raw_data, type)
+            self.write(concat_fname, concat_data)
+
+            minified_data = self._minify(raw_data, type, paths=paths)
+            self.write(minified_fname, minified_data)
+
+            gzipped_data = self._compress(minified_data)
+            self.write(gzipped_fname, gzipped_data)
 
         return {
             name: {
@@ -202,11 +210,19 @@ class AssetManager(object):
             }
         }
 
+    def _out_path(self, fname):
+        return os.path.join(os.path.abspath(self.config.get('output', OUTPUT_DIR)), fname)
+
+    def path_exists(self, fname):
+        return os.path.exists(self._out_path(fname))
+
     def write(self, fname, data):
-        output = os.path.abspath(self.config.get('output', OUTPUT_DIR))
+        path = self._out_path(fname)
+        output = os.path.dirname(path)
+
         if not os.path.exists(output):
             os.makedirs(output)
-        path = os.path.join(output, fname)
+
         with open(path, 'w') as fout:
             fout.write(data)
 
