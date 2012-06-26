@@ -184,6 +184,8 @@ class AssetManager(object):
             minified_data = open(self._out_path(minified_fname)).read()
             gzipped_data = open(self._out_path(gzipped_fname)).read()
         else:
+            print 'processing %s' % concat_fname
+
             concat_data = self._concat(raw_data, type)
             self.write(concat_fname, concat_data)
 
