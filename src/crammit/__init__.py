@@ -177,7 +177,7 @@ class AssetManager(object):
         minified_fname = fname_template.format(suffix='.min', gz='')
         gzipped_fname = fname_template.format(suffix='.min', gz='.gz')
 
-        if self.path_exists(concat_fname):
+        if self.config.get('fingerprint') and self.path_exists(concat_fname):
             print 'path exists, skipping %s' % concat_fname
 
             concat_data = open(self._out_path(concat_fname)).read()
