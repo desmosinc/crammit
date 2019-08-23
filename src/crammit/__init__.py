@@ -142,8 +142,10 @@ class AssetManager(object):
                 minify = lambda x: slimit.minify(x, **options)
 
         elif type == 'css':
-            # only one option for css right now
-            minify = cssmin.cssmin
+            if self.config.get('disable_cssmin'):
+                minify = lambda x: x
+            else:
+                minify = cssmin.cssmin
 
         def real_minify(path, contents):
             if '.min' in path:
